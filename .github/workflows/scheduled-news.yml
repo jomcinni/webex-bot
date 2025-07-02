@@ -1,0 +1,24 @@
+name: Scheduled Webex News
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 8am US Central (adjust as needed)
+    - cron: '0 22 * * *'   # 5pm US Central (adjust as needed)
+  workflow_dispatch:
+
+jobs:
+  post-news:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run scheduled news post
+        env:
+          WEBEX_BOT_TOKEN: ${{ secrets.WEBEX_BOT_TOKEN }}
+          ROOM_ID: ${{ secrets.ROOM_ID }}
+        run: python scheduled_news_post.py
