@@ -17,9 +17,11 @@ def get_news(topic="Customer Success Artificial Intelligence"):
     if not top_items:
         return f"No news found for '{topic}'."
     message = f"📰 *Top news for '{topic}':*\n"
-    for item in top_items:
-        message += f"- [{item.title}]({item.link})\n"
-    return message
+for item in top_items:
+    # Use item.summary if available, otherwise item.title
+    article_text = getattr(item, "summary", item.title)
+    summary = summarize_article(article_text)
+    message += f"- [{item.title}]({item.link})\n  _Summary_: {summary}\n"
 
 def send_message(room_id, message):
     url = "https://webexapis.com/v1/messages"
