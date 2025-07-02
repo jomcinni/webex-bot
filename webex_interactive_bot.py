@@ -4,8 +4,8 @@ from flask import Flask, request
 import feedparser
 
 WEBEX_BOT_TOKEN = os.environ["WEBEX_BOT_TOKEN"]
-  ROOM_ID = os.environ["ROOM_ID"]
-  BOT_EMAIL = os.environ["BOT_EMAIL"]
+ROOM_ID = os.environ["ROOM_ID"]
+BOT_EMAIL = os.environ["BOT_EMAIL"]
   
 app = Flask(__name__)
 
