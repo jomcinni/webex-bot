@@ -1,35 +1,35 @@
-import os
-import requests
-import feedparser
+def summarize_article(article_text):
+    import requests
+    import json
+    import os
 
-WEBEX_BOT_TOKEN = os.environ["WEBEX_BOT_TOKEN"]
-ROOM_ID = os.environ["ROOM_ID"]
+    API_URL = "https://chat-ai.cisco.com/openai/deployments/gpt-4o-mini/chat/completions"
+    API_KEY = os.environ["CIRCUIT_API_KEY"]  # Set this as a GitHub secret
+    APP_KEY = os.environ["CIRCUIT_APP_KEY"]  # Set this as a GitHub secret
 
-def get_news(topic="Customer Success Artificial Intelligence"):
-    rss_url = f"https://news.google.com/rss/search?q={topic.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
-    feed = feedparser.parse(rss_url)
-    top_items = feed.entries[:3]
-    if not top_items:
-        return f"No news found for '{topic}'."
-    message = f"📰 *Top news for '{topic}':*\n"
-    for item in top_items:
-        message += f"- [{item.title}]({item.link})\n"
-    return message
-
-def send_message(room_id, message):
-    url = "https://webexapis.com/v1/messages"
     headers = {
-        "Authorization": f"Bearer {WEBEX_BOT_TOKEN}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "api-key": API_KEY
     }
-    data = {
-        "roomId": room_id,
-        "markdown": message
-    }
-    response = requests.post(url, headers=headers, json=data)
-    print(f"Status code: {response.status_code}")
-    print(f"Response: {response.text}")
 
-if __name__ == "__main__":
-    message = get_news()
-    send_message(ROOM_ID, message)
+    data = {
+        "messages": [
+            {"role": "system", "content": "You are a helpful assistant that summarizes news articles."},
+            {"role": "user", "content": f"Summarize this article: {article_text}"}
+        ],
+        "user": json.dumps({"appkey": APP_KEY}),
+        "stop": ["<|im_end|>"]
+    }
+
+    try:
+        response = requests.post(API_URL, headers=headers, json=data, timeout=30)
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            print(f"Summarization API error: {response.status_code} {response.text}")
+            return "Summary unavailable."
+    except Exception as e:
+        print(f"Summarization API exception: {e}")
+        return "Summary unavailable."
