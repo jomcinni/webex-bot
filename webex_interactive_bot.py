@@ -3,10 +3,10 @@ import requests
 from flask import Flask, request
 import feedparser
 
-WEBEX_BOT_TOKEN = os.environ["NTM1YjBlZjAtMTM4Ny00OThiLTk4ZTctMzJjZTBjYWNjMGZiOTg1ZjAzNGMtNTQ1_PF84_1eb65fdf-9643-417f-9974-ad72cae0e10f"]
-ROOM_ID = os.environ["Y2lzY29zcGFyazovL3VzL1JPT00vNzY1YTllMjAtNTZjZC0xMWYwLThlYTQtMDc4NDI3Y2RhNzYz"]
-BOT_EMAIL = os.environ["newsroom-bot@webex.bot"]
-
+WEBEX_BOT_TOKEN = os.environ["WEBEX_BOT_TOKEN"]
+  ROOM_ID = os.environ["ROOM_ID"]
+  BOT_EMAIL = os.environ["BOT_EMAIL"]
+  
 app = Flask(__name__)
 
 def get_news(topic="Customer Success Artificial Intelligence"):
