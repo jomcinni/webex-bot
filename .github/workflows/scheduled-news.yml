@@ -17,8 +17,10 @@ jobs:
           python-version: '3.x'
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run scheduled news post
+            - name: Run scheduled news post
         env:
           WEBEX_BOT_TOKEN: ${{ secrets.WEBEX_BOT_TOKEN }}
           ROOM_ID: ${{ secrets.ROOM_ID }}
+          CIRCUIT_API_KEY: ${{ secrets.CIRCUIT_API_KEY }}
+          CIRCUIT_APP_KEY: ${{ secrets.CIRCUIT_APP_KEY }}
         run: python scheduled_news_post.py
