@@ -26,7 +26,9 @@ def send_message(room_id, message):
         "roomId": room_id,
         "markdown": message
     }
-    requests.post(url, headers=headers, json=data)
+    response = requests.post(url, headers=headers, json=data)
+    print(f"Status code: {response.status_code}")
+    print(f"Response: {response.text}")
 
 if __name__ == "__main__":
     message = get_news()
