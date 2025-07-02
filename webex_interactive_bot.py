@@ -1,0 +1,63 @@
+import os
+import requests
+from flask import Flask, request
+import feedparser
+
+WEBEX_BOT_TOKEN = os.environ["NTM1YjBlZjAtMTM4Ny00OThiLTk4ZTctMzJjZTBjYWNjMGZiOTg1ZjAzNGMtNTQ1_PF84_1eb65fdf-9643-417f-9974-ad72cae0e10f"]
+ROOM_ID = os.environ["Y2lzY29zcGFyazovL3VzL1JPT00vNzY1YTllMjAtNTZjZC0xMWYwLThlYTQtMDc4NDI3Y2RhNzYz"]
+BOT_EMAIL = os.environ["newsroom-bot@webex.bot"]
+
+app = Flask(__name__)
+
+def get_news(topic="Customer Success Artificial Intelligence"):
+    rss_url = f"https://news.google.com/rss/search?q={topic.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
+    feed = feedparser.parse(rss_url)
+    top_items = feed.entries[:3]
+    if not top_items:
+        return f"No news found for '{topic}'."
+    message = f"📰 *Top news for '{topic}':*\n"
+    for item in top_items:
+        message += f"- [{item.title}]({item.link})\n"
+    return message
+
+def send_message(room_id, message):
+    url = "https://webexapis.com/v1/messages"
+    headers = {
+        "Authorization": f"Bearer {WEBEX_BOT_TOKEN}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "roomId": room_id,
+        "markdown": message
+    }
+    requests.post(url, headers=headers, json=data)
+
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    data = request.json
+    # Ignore messages from the bot itself
+    if data["data"]["personEmail"] == BOT_EMAIL:
+        return "OK"
+    room_id = data["data"]["roomId"]
+    message_id = data["data"]["id"]
+
+    # Get the message text
+    msg_url = f"https://webexapis.com/v1/messages/{message_id}"
+    headers = {"Authorization": f"Bearer {WEBEX_BOT_TOKEN}"}
+    msg_data = requests.get(msg_url, headers=headers).json()
+    text = msg_data.get("text", "").strip().lower()
+
+    # Respond to commands
+    if text.startswith("news about "):
+        topic = text.replace("news about ", "")
+        reply = get_news(topic)
+    elif text == "news":
+        reply = get_news()
+    else:
+        reply = "Hi! Type `news` for general AI Customer Success news, or `news about <topic>` for something specific."
+
+    send_message(room_id, reply)
+    return "OK"
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)

@@ -1,0 +1,14 @@
+   services:
+     - type: web
+       name: webex-interactive-bot
+       env: python
+       plan: free
+       buildCommand: ""
+       startCommand: python webex_interactive_bot.py
+       envVars:
+         - key: WEBEX_BOT_TOKEN
+           sync: false
+         - key: ROOM_ID
+           sync: false
+         - key: BOT_EMAIL
+           sync: false
