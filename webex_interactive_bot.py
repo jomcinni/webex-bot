@@ -3,10 +3,11 @@ import requests
 from flask import Flask, request
 import feedparser
 
+# Get secrets from environment variables (set in Render dashboard)
 WEBEX_BOT_TOKEN = os.environ["WEBEX_BOT_TOKEN"]
 ROOM_ID = os.environ["ROOM_ID"]
 BOT_EMAIL = os.environ["BOT_EMAIL"]
-  
+
 app = Flask(__name__)
 
 def get_news(topic="Customer Success Artificial Intelligence"):
@@ -46,12 +47,13 @@ def webhook():
     headers = {"Authorization": f"Bearer {WEBEX_BOT_TOKEN}"}
     msg_data = requests.get(msg_url, headers=headers).json()
     text = msg_data.get("text", "").strip().lower()
+    print(f"Received message: '{text}'")  # For debugging
 
-    # Respond to commands
-    if text.startswith("news about "):
-        topic = text.replace("news about ", "")
-        reply = get_news(topic)
-    elif text == "news":
+    # Improved prompt matching
+    if text.startswith("news about"):
+        topic = text[len("news about"):].strip(" :")
+        reply = get_news(topic if topic else "Customer Success Artificial Intelligence")
+    elif text.strip(" .!?") == "news":
         reply = get_news()
     else:
         reply = "Hi! Type `news` for general AI Customer Success news, or `news about <topic>` for something specific."
