@@ -3,6 +3,33 @@ import requests
 import feedparser
 import json
 
+def get_circuit_access_token():
+    import base64
+
+    client_id = os.environ["CIRCUIT_CLIENT_ID"]
+    client_secret = os.environ["CIRCUIT_CLIENT_SECRET"]
+    token_url = "https://id.cisco.com/oauth2/default/v1/token"
+
+    # Encode client_id:client_secret in base64
+    credentials = f"{client_id}:{client_secret}"
+    encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+    headers = {
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": f"Basic {encoded_credentials}"
+    }
+    data = {
+        "grant_type": "client_credentials"
+    }
+
+    response = requests.post(token_url, headers=headers, data=data)
+    if response.status_code == 200:
+        return response.json()["access_token"]
+    else:
+        print("Failed to get CIRCUIT access token:", response.status_code, response.text)
+        return None
+    
 # Get secrets from environment variables (set as GitHub Actions secrets)
 WEBEX_BOT_TOKEN = os.environ["WEBEX_BOT_TOKEN"]
 ROOM_ID = os.environ["ROOM_ID"]
