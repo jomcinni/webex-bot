@@ -10,6 +10,10 @@ BOT_EMAIL = os.environ["BOT_EMAIL"]
 
 app = Flask(__name__)
 
+def summarize_article(article_text):
+    # Placeholder: just return the first 200 characters for now
+    return article_text[:200] + "..." if len(article_text) > 200 else article_text
+
 def get_news(topic="Customer Success Artificial Intelligence"):
     rss_url = f"https://news.google.com/rss/search?q={topic.replace(' ', '+')}&hl=en-US&gl=US&ceid=US:en"
     feed = feedparser.parse(rss_url)
@@ -17,11 +21,12 @@ def get_news(topic="Customer Success Artificial Intelligence"):
     if not top_items:
         return f"No news found for '{topic}'."
     message = f"📰 *Top news for '{topic}':*\n"
-for item in top_items:
-    # Use item.summary if available, otherwise item.title
-    article_text = getattr(item, "summary", item.title)
-    summary = summarize_article(article_text)
-    message += f"- [{item.title}]({item.link})\n  _Summary_: {summary}\n"
+    for item in top_items:
+        # Use item.summary if available, otherwise item.title
+        article_text = getattr(item, "summary", item.title)
+        summary = summarize_article(article_text)
+        message += f"- [{item.title}]({item.link})\n  _Summary_: {summary}\n"
+    return message
 
 def send_message(room_id, message):
     url = "https://webexapis.com/v1/messages"
